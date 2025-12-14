@@ -48,7 +48,7 @@ func (c *Client) autoMigrate() error {
 
 	// create client table
 	platformTable := `
-	CREATE TABLE IF NOT EXISTS clients (
+	CREATE TABLE IF NOT EXISTS platforms (
 		id UUID PRIMARY KEY,
 		name TEXT NOT NULL,	
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -73,7 +73,7 @@ func (c *Client) autoMigrate() error {
 		provider_id UUID,
 		platform_id UUID,
 		FOREIGN KEY(provider_id) REFERENCES providers(id),
-		FOREIGN KEY(platmform_id) REFERENCES platform(id)
+		FOREIGN KEY(platform_id) REFERENCES platform(id)
 	);
 	`
 	// create userTable in database
