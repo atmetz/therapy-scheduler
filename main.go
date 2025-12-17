@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
@@ -19,17 +18,17 @@ import (
 )
 
 type apiConfig struct {
-	db database.Queries
+	db          database.Queries
+	currentUser database.Provider
 }
 
-type provider struct {
-	ID          uuid.UUID
-	Name        string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	Password    string
-	PhoneNumber string
-	Email       string
+type parameters struct {
+	Name       string
+	Email      string
+	Phone      string
+	Password   string
+	ProviderID uuid.UUID
+	PlatformID uuid.UUID
 }
 
 func main() {
@@ -48,9 +47,13 @@ func main() {
 	defer db.Close()
 
 	dbQueries := database.New(db)
+	currentUser := database.Provider{
+		Name: "User",
+	}
 
 	cfg := apiConfig{
-		db: *dbQueries,
+		db:          *dbQueries,
+		currentUser: currentUser,
 	}
 
 	a := app.New()
@@ -58,87 +61,29 @@ func main() {
 	w.Resize(fyne.NewSize(1000, 1000))
 	w.CenterOnScreen()
 
-	currentUser := provider{
-		Name: "User",
-	}
-	welcomeMessage := fmt.Sprintf("Welcome %s", currentUser.Name)
-	hello := widget.NewLabel(welcomeMessage)
+	welcomeMessage := fmt.Sprintf("Welcome %s", cfg.currentUser.Name)
+	welcomeLabel := widget.NewLabel(welcomeMessage)
+	actionMessage := ""
+	actionLabel := widget.NewLabel(actionMessage)
 
 	w.SetContent(container.NewVBox(
-		hello,
+		welcomeLabel,
+		actionLabel,
+		// Create new providers window
 		widget.NewButton("Register Provider", func() {
-			// Create new providers window
-			providersWindow := a.NewWindow("Register Provider")
-			providersWindow.Resize(fyne.NewSize(300, 300))
-			providersWindow.CenterOnScreen()
-			providerName := widget.NewEntry()
-			providerPassword := widget.NewEntry()
-			providerEmail := widget.NewEntry()
-			providerPhone := widget.NewEntry()
-
-			// Create new provider form
-			providerForm := &widget.Form{
-				Items: []*widget.FormItem{
-					{Text: "Name", Widget: providerName},
-					{Text: "Email", Widget: providerEmail},
-					{Text: "Phone", Widget: providerPhone},
-					{Text: "Password", Widget: providerPassword},
-				},
-				OnSubmit: func() {
-					currentUser, err := cfg.handlerProvidersCreate(parameters{
-						Name:     providerName.Text,
-						Email:    providerEmail.Text,
-						Phone:    providerPhone.Text,
-						Password: providerPassword.Text,
-					})
-					if err != nil {
-						log.Printf("%v\n", err)
-					}
-					providersWindow.Close()
-					welcomeMessage = fmt.Sprintf("Welcome %s", currentUser.Name)
-					hello.SetText(welcomeMessage)
-				},
-				OnCancel: func() {
-					providersWindow.Close()
-				},
-			}
-
-			providersWindow.SetContent(providerForm)
-			providersWindow.Show()
+			cfg.newProviderWindow(a, welcomeLabel)
 		}),
-		// Provider Login Widget
+		// Provider Login
 		widget.NewButton("Provider Login", func() {
-			providersWindow := a.NewWindow("Provider Login")
-			providersWindow.Resize(fyne.NewSize(300, 300))
-			providersWindow.CenterOnScreen()
-			providerPassword := widget.NewEntry()
-			providerEmail := widget.NewEntry()
-			// Provider Login Form
-			loginForm := &widget.Form{
-				Items: []*widget.FormItem{
-					{Text: "Email", Widget: providerEmail},
-					{Text: "Password", Widget: providerPassword},
-				},
-				OnSubmit: func() {
-					user, err := cfg.handlerProviderLogin(parameters{
-						Email:    providerEmail.Text,
-						Password: providerPassword.Text,
-					})
-					if err != nil {
-						fmt.Println(err)
-					} else {
-						providersWindow.Close()
-						welcomeMessage = fmt.Sprintf("Welcome %s", user.Name)
-						hello.SetText(welcomeMessage)
-					}
-				},
-				OnCancel: func() {
-					providersWindow.Close()
-				},
-			}
-
-			providersWindow.SetContent(loginForm)
-			providersWindow.Show()
+			cfg.providerLoginWindow(a, welcomeLabel)
+		}),
+		// Add new client
+		widget.NewButton("Add Client", func() {
+			cfg.clientWindow(a, actionLabel)
+		}),
+		// Add new platform
+		widget.NewButton("Add Platform", func() {
+			cfg.platformWindow(a, actionLabel)
 		}),
 	))
 

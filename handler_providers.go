@@ -10,13 +10,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type parameters struct {
-	Name     string
-	Email    string
-	Phone    string
-	Password string
-}
-
 func (cfg *apiConfig) handlerProvidersCreate(params parameters) (database.Provider, error) {
 
 	_, err := cfg.db.GetProviderByEmail(context.Background(), params.Email)
@@ -56,7 +49,7 @@ func (cfg *apiConfig) handlerProviderLogin(params parameters) (database.Provider
 	match, err := auth.CheckPasswordHash(params.Password, user.Password)
 
 	if err != nil || !match {
-		return database.Provider{}, fmt.Errorf("incorrect password %s", err)
+		return database.Provider{}, fmt.Errorf("incorrect password")
 	}
 
 	return user, nil
