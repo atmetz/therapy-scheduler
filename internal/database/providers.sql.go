@@ -13,7 +13,7 @@ import (
 )
 
 const createProvider = `-- name: CreateProvider :one
-INSERT INTO providers (id, created_at, updated_at, name, password, phone_number, email)
+INSERT INTO providers (id, created_at, updated_at, name, password, phone_number, email, sessions_available)
 VALUES (
     ?, 
     ?, 
@@ -21,19 +21,21 @@ VALUES (
     ?, 
     ?, 
     ?,
+    ?,
     ?
 )
-RETURNING id, name, created_at, updated_at, password, phone_number, email
+RETURNING id, name, created_at, updated_at, password, phone_number, email, sessions_available
 `
 
 type CreateProviderParams struct {
-	ID          uuid.UUID
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	Name        string
-	Password    string
-	PhoneNumber string
-	Email       string
+	ID                uuid.UUID
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+	Name              string
+	Password          string
+	PhoneNumber       string
+	Email             string
+	SessionsAvailable int64
 }
 
 func (q *Queries) CreateProvider(ctx context.Context, arg CreateProviderParams) (Provider, error) {
@@ -45,6 +47,7 @@ func (q *Queries) CreateProvider(ctx context.Context, arg CreateProviderParams) 
 		arg.Password,
 		arg.PhoneNumber,
 		arg.Email,
+		arg.SessionsAvailable,
 	)
 	var i Provider
 	err := row.Scan(
@@ -55,12 +58,13 @@ func (q *Queries) CreateProvider(ctx context.Context, arg CreateProviderParams) 
 		&i.Password,
 		&i.PhoneNumber,
 		&i.Email,
+		&i.SessionsAvailable,
 	)
 	return i, err
 }
 
 const getProvider = `-- name: GetProvider :one
-SELECT id, name, created_at, updated_at, password, phone_number, email FROM providers
+SELECT id, name, created_at, updated_at, password, phone_number, email, sessions_available FROM providers
 WHERE name = ?
 `
 
@@ -75,12 +79,13 @@ func (q *Queries) GetProvider(ctx context.Context, name string) (Provider, error
 		&i.Password,
 		&i.PhoneNumber,
 		&i.Email,
+		&i.SessionsAvailable,
 	)
 	return i, err
 }
 
 const getProviderByEmail = `-- name: GetProviderByEmail :one
-SELECT id, name, created_at, updated_at, password, phone_number, email FROM providers
+SELECT id, name, created_at, updated_at, password, phone_number, email, sessions_available FROM providers
 WHERE email = ?
 `
 
@@ -95,12 +100,13 @@ func (q *Queries) GetProviderByEmail(ctx context.Context, email string) (Provide
 		&i.Password,
 		&i.PhoneNumber,
 		&i.Email,
+		&i.SessionsAvailable,
 	)
 	return i, err
 }
 
 const getProviderById = `-- name: GetProviderById :one
-SELECT id, name, created_at, updated_at, password, phone_number, email FROM providers 
+SELECT id, name, created_at, updated_at, password, phone_number, email, sessions_available FROM providers 
 WHERE id = ?
 `
 
@@ -115,12 +121,13 @@ func (q *Queries) GetProviderById(ctx context.Context, id uuid.UUID) (Provider, 
 		&i.Password,
 		&i.PhoneNumber,
 		&i.Email,
+		&i.SessionsAvailable,
 	)
 	return i, err
 }
 
 const getProviders = `-- name: GetProviders :many
-SELECT id, name, created_at, updated_at, password, phone_number, email FROM providers
+SELECT id, name, created_at, updated_at, password, phone_number, email, sessions_available FROM providers
 `
 
 func (q *Queries) GetProviders(ctx context.Context) ([]Provider, error) {
@@ -140,6 +147,7 @@ func (q *Queries) GetProviders(ctx context.Context) ([]Provider, error) {
 			&i.Password,
 			&i.PhoneNumber,
 			&i.Email,
+			&i.SessionsAvailable,
 		); err != nil {
 			return nil, err
 		}

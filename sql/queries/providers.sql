@@ -1,11 +1,12 @@
 -- name: CreateProvider :one
-INSERT INTO providers (id, created_at, updated_at, name, password, phone_number, email)
+INSERT INTO providers (id, created_at, updated_at, name, password, phone_number, email, sessions_available)
 VALUES (
     ?, 
     ?, 
     ?, 
     ?, 
     ?, 
+    ?,
     ?,
     ?
 )

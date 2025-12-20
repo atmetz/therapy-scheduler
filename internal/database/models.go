@@ -17,6 +17,9 @@ type Client struct {
 	Email       string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+	Frequency   string
+	StartDate   time.Time
+	EndDate     time.Time
 	ProviderID  uuid.UUID
 	PlatformID  uuid.UUID
 }
@@ -29,11 +32,12 @@ type Platform struct {
 }
 
 type Provider struct {
-	ID          uuid.UUID
-	Name        string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	Password    string
-	PhoneNumber string
-	Email       string
+	ID                uuid.UUID
+	Name              string
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+	Password          string
+	PhoneNumber       string
+	Email             string
+	SessionsAvailable int64
 }

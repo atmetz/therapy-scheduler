@@ -23,13 +23,14 @@ func (cfg *apiConfig) handlerProvidersCreate(params parameters) (database.Provid
 	}
 
 	user, err := cfg.db.CreateProvider(context.Background(), database.CreateProviderParams{
-		ID:          uuid.New(),
-		Name:        params.Name,
-		CreatedAt:   time.Now().UTC(),
-		UpdatedAt:   time.Now().UTC(),
-		Password:    hashedPassword,
-		PhoneNumber: params.Phone,
-		Email:       params.Email,
+		ID:                uuid.New(),
+		Name:              params.Name,
+		CreatedAt:         time.Now().UTC(),
+		UpdatedAt:         time.Now().UTC(),
+		Password:          hashedPassword,
+		PhoneNumber:       params.Phone,
+		Email:             params.Email,
+		SessionsAvailable: params.SessionsAvailable,
 	})
 	if err != nil {
 		return database.Provider{}, fmt.Errorf("couldn't create provider %s", err)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
@@ -23,12 +24,15 @@ type apiConfig struct {
 }
 
 type parameters struct {
-	Name       string
-	Email      string
-	Phone      string
-	Password   string
-	ProviderID uuid.UUID
-	PlatformID uuid.UUID
+	Name              string
+	Email             string
+	Phone             string
+	Password          string
+	Frequency         string
+	ProviderID        uuid.UUID
+	PlatformID        uuid.UUID
+	StartDate         time.Time
+	SessionsAvailable int64
 }
 
 func main() {

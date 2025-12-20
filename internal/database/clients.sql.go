@@ -13,7 +13,7 @@ import (
 )
 
 const createClient = `-- name: CreateClient :one
-INSERT INTO clients (id, created_at, updated_at, name, phone_number, email, platform_id, provider_id)
+INSERT INTO clients (id, created_at, updated_at, name, phone_number, email, frequency, start_date, end_date, platform_id, provider_id)
 VALUES (
     ?, 
     ?, 
@@ -22,9 +22,12 @@ VALUES (
     ?, 
     ?,
     ?,
+    ?,
+    ?,
+    ?,
     ?
 )
-RETURNING id, name, phone_number, email, created_at, updated_at, provider_id, platform_id
+RETURNING id, name, phone_number, email, created_at, updated_at, frequency, start_date, end_date, provider_id, platform_id
 `
 
 type CreateClientParams struct {
@@ -34,6 +37,9 @@ type CreateClientParams struct {
 	Name        string
 	PhoneNumber string
 	Email       string
+	Frequency   string
+	StartDate   time.Time
+	EndDate     time.Time
 	PlatformID  uuid.UUID
 	ProviderID  uuid.UUID
 }
@@ -46,6 +52,9 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cli
 		arg.Name,
 		arg.PhoneNumber,
 		arg.Email,
+		arg.Frequency,
+		arg.StartDate,
+		arg.EndDate,
 		arg.PlatformID,
 		arg.ProviderID,
 	)
@@ -57,6 +66,9 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cli
 		&i.Email,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Frequency,
+		&i.StartDate,
+		&i.EndDate,
 		&i.ProviderID,
 		&i.PlatformID,
 	)

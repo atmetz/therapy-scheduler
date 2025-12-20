@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -55,6 +56,8 @@ func (cfg *apiConfig) clientWindow(a fyne.App, actionLabel *widget.Label) {
 	clientName := widget.NewEntry()
 	clientEmail := widget.NewEntry()
 	clientPhone := widget.NewEntry()
+	clientFrequency := widget.NewEntry()
+	startDate := widget.NewDateEntry()
 	errorMessage := ""
 	errorLabel := widget.NewLabel(errorMessage)
 
@@ -74,25 +77,28 @@ func (cfg *apiConfig) clientWindow(a fyne.App, actionLabel *widget.Label) {
 			{Text: "Name", Widget: clientName},
 			{Text: "Email", Widget: clientEmail},
 			{Text: "Phone Number", Widget: clientPhone},
+			{Text: "Freguency of Care", Widget: clientFrequency},
 			{Text: "Platform", Widget: selectWidget},
+			{Text: "Start Date", Widget: startDate},
 		},
 		OnSubmit: func() {
-			// Add Platform
-
+			// Add Client
 			platformID, err := cfg.getPlatformID(selectedValue)
 			if err != nil {
 				errorMessage = fmt.Sprintf("%s", err)
 				errorLabel.SetText(errorMessage)
 			} else {
-
 				client, err := cfg.handlerClientsCreate(parameters{
 					Name:       clientName.Text,
 					Email:      clientEmail.Text,
 					Phone:      clientPhone.Text,
+					Frequency:  clientFrequency.Text,
 					ProviderID: cfg.currentUser.ID,
 					PlatformID: platformID,
+					StartDate:  *startDate.Date,
 				})
 				if err != nil {
+					fmt.Println("\nerrored")
 					errorMessage = fmt.Sprintf("%s", err)
 					errorLabel.SetText(errorMessage)
 				} else {
@@ -107,7 +113,10 @@ func (cfg *apiConfig) clientWindow(a fyne.App, actionLabel *widget.Label) {
 		},
 	}
 
-	clientWindow.SetContent(clientForm)
+	clientWindow.SetContent(container.NewVBox(
+		clientForm,
+		errorLabel,
+	))
 	clientWindow.Show()
 }
 
@@ -161,6 +170,7 @@ func (cfg *apiConfig) newProviderWindow(a fyne.App, welcomeLabel *widget.Label) 
 	providerPassword := widget.NewEntry()
 	providerEmail := widget.NewEntry()
 	providerPhone := widget.NewEntry()
+	providerSessions := widget.NewEntry()
 	errorMessage := ""
 	errorLabel := widget.NewLabel(errorMessage)
 
@@ -171,23 +181,31 @@ func (cfg *apiConfig) newProviderWindow(a fyne.App, welcomeLabel *widget.Label) 
 			{Text: "Email", Widget: providerEmail},
 			{Text: "Phone", Widget: providerPhone},
 			{Text: "Password", Widget: providerPassword},
+			{Text: "Available Sessions", Widget: providerSessions},
 		},
 		OnSubmit: func() {
-			user, err := cfg.handlerProvidersCreate(parameters{
-				Name:     providerName.Text,
-				Email:    providerEmail.Text,
-				Phone:    providerPhone.Text,
-				Password: providerPassword.Text,
-			})
+			numSessions, err := strconv.ParseInt(providerSessions.Text, 10, 64)
 			if err != nil {
-
-				errorMessage = fmt.Sprintf("%s", err)
+				errorMessage = "Please use only numbers for Available Sessions"
 				errorLabel.SetText(errorMessage)
 			} else {
-				providersWindow.Close()
-				cfg.currentUser = user
-				welcomeMessage := fmt.Sprintf("Welcome %s", cfg.currentUser.Name)
-				welcomeLabel.SetText(welcomeMessage)
+				user, err := cfg.handlerProvidersCreate(parameters{
+					Name:              providerName.Text,
+					Email:             providerEmail.Text,
+					Phone:             providerPhone.Text,
+					Password:          providerPassword.Text,
+					SessionsAvailable: numSessions,
+				})
+				if err != nil {
+
+					errorMessage = fmt.Sprintf("%s", err)
+					errorLabel.SetText(errorMessage)
+				} else {
+					providersWindow.Close()
+					cfg.currentUser = user
+					welcomeMessage := fmt.Sprintf("Welcome %s", cfg.currentUser.Name)
+					welcomeLabel.SetText(welcomeMessage)
+				}
 			}
 		},
 		OnCancel: func() {

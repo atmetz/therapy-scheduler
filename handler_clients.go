@@ -18,8 +18,11 @@ func (cfg *apiConfig) handlerClientsCreate(params parameters) (database.Client, 
 		UpdatedAt:   time.Now().UTC(),
 		Email:       params.Email,
 		PhoneNumber: params.Phone,
+		Frequency:   params.Frequency,
 		PlatformID:  params.PlatformID,
 		ProviderID:  params.ProviderID,
+		StartDate:   params.StartDate,
+		EndDate:     time.Time{},
 	})
 	if err != nil {
 		return database.Client{}, fmt.Errorf("couldn't create client %s", err)
