@@ -74,3 +74,43 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cli
 	)
 	return i, err
 }
+
+const getClientsByProvider = `-- name: GetClientsByProvider :many
+SELECT id, name, phone_number, email, created_at, updated_at, frequency, start_date, end_date, provider_id, platform_id FROM clients
+WHERE provider_id = ?
+`
+
+func (q *Queries) GetClientsByProvider(ctx context.Context, providerID uuid.UUID) ([]Client, error) {
+	rows, err := q.db.QueryContext(ctx, getClientsByProvider, providerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Client
+	for rows.Next() {
+		var i Client
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.PhoneNumber,
+			&i.Email,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Frequency,
+			&i.StartDate,
+			&i.EndDate,
+			&i.ProviderID,
+			&i.PlatformID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

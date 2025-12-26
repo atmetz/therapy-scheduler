@@ -70,25 +70,43 @@ func main() {
 	actionMessage := ""
 	actionLabel := widget.NewLabel(actionMessage)
 
+	quitItem := fyne.NewMenuItem("Quit", func() {
+		a.Quit()
+	})
+	fileMenu := fyne.NewMenu("File", quitItem)
+
+	providerItem := fyne.NewMenuItem("Provider Login", func() {
+		cfg.providerLoginWindow(a, welcomeLabel)
+	})
+	providerRegisterItem := fyne.NewMenuItem("New Provider", func() {
+		cfg.newProviderWindow(a, welcomeLabel)
+	})
+	providerMenu := fyne.NewMenu("Provider",
+		providerItem,
+		providerRegisterItem)
+
+	clientItem := fyne.NewMenuItem("Add Client", func() {
+		cfg.clientWindow(a, actionLabel)
+	})
+	clientMenu := fyne.NewMenu("Client", clientItem)
+
+	platformItem := fyne.NewMenuItem("Add Platform", func() {
+		cfg.platformWindow(a, actionLabel)
+	})
+	platformMenu := fyne.NewMenu("Platform", platformItem)
+
+	mainMenu := fyne.NewMainMenu(
+		fileMenu,
+		providerMenu,
+		clientMenu,
+		platformMenu,
+	)
+
+	w.SetMainMenu(mainMenu)
+
 	w.SetContent(container.NewVBox(
 		welcomeLabel,
 		actionLabel,
-		// Create new providers window
-		widget.NewButton("Register Provider", func() {
-			cfg.newProviderWindow(a, welcomeLabel)
-		}),
-		// Provider Login
-		widget.NewButton("Provider Login", func() {
-			cfg.providerLoginWindow(a, welcomeLabel)
-		}),
-		// Add new client
-		widget.NewButton("Add Client", func() {
-			cfg.clientWindow(a, actionLabel)
-		}),
-		// Add new platform
-		widget.NewButton("Add Platform", func() {
-			cfg.platformWindow(a, actionLabel)
-		}),
 	))
 
 	w.Show()

@@ -56,7 +56,6 @@ func (cfg *apiConfig) clientWindow(a fyne.App, actionLabel *widget.Label) {
 	clientName := widget.NewEntry()
 	clientEmail := widget.NewEntry()
 	clientPhone := widget.NewEntry()
-	clientFrequency := widget.NewEntry()
 	startDate := widget.NewDateEntry()
 	errorMessage := ""
 	errorLabel := widget.NewLabel(errorMessage)
@@ -67,9 +66,14 @@ func (cfg *apiConfig) clientWindow(a fyne.App, actionLabel *widget.Label) {
 		errorLabel.SetText(errorMessage)
 	}
 	var actionMessage string
-	var selectedValue string
-	selectWidget := widget.NewSelect(options, func(value string) {
-		selectedValue = value
+	var selectedPlatform string
+	selectPlatform := widget.NewSelect(options, func(value string) {
+		selectedPlatform = value
+	})
+
+	var selectedFrequency string
+	selectFrequency := widget.NewSelect([]string{"Weekly", "Every other week", "Once a month", "Every other month", "Schedules session after each session", "No appointments scheduled"}, func(value string) {
+		selectedFrequency = value
 	})
 	// New Client Form
 	clientForm := &widget.Form{
@@ -77,13 +81,14 @@ func (cfg *apiConfig) clientWindow(a fyne.App, actionLabel *widget.Label) {
 			{Text: "Name", Widget: clientName},
 			{Text: "Email", Widget: clientEmail},
 			{Text: "Phone Number", Widget: clientPhone},
-			{Text: "Freguency of Care", Widget: clientFrequency},
-			{Text: "Platform", Widget: selectWidget},
+			{Text: "Freguency of Appointments", Widget: selectFrequency},
+			{Text: "Platform", Widget: selectPlatform},
 			{Text: "Start Date", Widget: startDate},
 		},
 		OnSubmit: func() {
 			// Add Client
-			platformID, err := cfg.getPlatformID(selectedValue)
+			platformID, err := cfg.getPlatformID(selectedPlatform)
+
 			if err != nil {
 				errorMessage = fmt.Sprintf("%s", err)
 				errorLabel.SetText(errorMessage)
@@ -92,7 +97,7 @@ func (cfg *apiConfig) clientWindow(a fyne.App, actionLabel *widget.Label) {
 					Name:       clientName.Text,
 					Email:      clientEmail.Text,
 					Phone:      clientPhone.Text,
-					Frequency:  clientFrequency.Text,
+					Frequency:  selectedFrequency,
 					ProviderID: cfg.currentUser.ID,
 					PlatformID: platformID,
 					StartDate:  *startDate.Date,

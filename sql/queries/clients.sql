@@ -14,3 +14,7 @@ VALUES (
     ?
 )
 RETURNING *;
+
+-- name: GetClientsByProvider :many
+SELECT * FROM clients
+WHERE provider_id = ?;
