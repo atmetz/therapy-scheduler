@@ -125,7 +125,7 @@ func (cfg *apiConfig) clientWindow(a fyne.App, actionLabel *widget.Label) {
 	clientWindow.Show()
 }
 
-func (cfg *apiConfig) providerLoginWindow(a fyne.App, welcomeLabel *widget.Label) {
+func (cfg *apiConfig) providerLoginWindow(a fyne.App, welcomeLabel *widget.Label, actionLabel *widget.Label, table *widget.Table) {
 	providersWindow := a.NewWindow("Provider Login")
 	providersWindow.Resize(fyne.NewSize(300, 300))
 	providersWindow.CenterOnScreen()
@@ -153,7 +153,9 @@ func (cfg *apiConfig) providerLoginWindow(a fyne.App, welcomeLabel *widget.Label
 				cfg.currentUser = user
 				welcomeMessage := fmt.Sprintf("Welcome %s", cfg.currentUser.Name)
 				welcomeLabel.SetText(welcomeMessage)
+				cfg.updateClientTable(actionLabel, table)
 			}
+
 		},
 		OnCancel: func() {
 			providersWindow.Close()
